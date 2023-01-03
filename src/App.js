@@ -1,12 +1,9 @@
 const BridgeController = require('./controller/BridgeController');
 
 class App {
-  #bridgeController;
-  constructor() {
-    this.#bridgeController = new BridgeController();
-  }
   play() {
-    this.#bridgeController.start();
+    const bridgeController = new BridgeController();
+    bridgeController.start();
   }
 }
 const app = new App();

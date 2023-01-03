@@ -6,9 +6,10 @@ const REQUEST_MESSAGE = Object.freeze({
   retryOrQuit: '게임을 다시 시도할지 여부를 입력해주세요. (재시도: R, 종료: Q)\n',
 });
 
-const CROSSING_RESULT_MESSAGE = Object.freeze({
-  success: '성공',
-  fail: '실패',
+const GAME_STATUS = Object.freeze({
+  win: 'win',
+  fail: 'fail',
+  playing: 'playing',
 });
 
 const ERROR_MESSAGE = Object.freeze({
@@ -19,14 +20,15 @@ const ERROR_MESSAGE = Object.freeze({
 
 const RESULT_MESSAGE = Object.freeze({
   finalGameResult: '최종 게임 결과',
-  crossingResult: (result) => `게임 성공 여부: ${result}`,
-  totalNumberOfAttempts: (attemps) => `총 시도한 횟수: ${attemps}`,
+  win: '게임 성공 여부: 성공',
+  fail: '게임 성공 여부: 실패',
+  try: '총 시도한 횟수: ',
 });
 
 module.exports = {
   START_MESSAGE,
   REQUEST_MESSAGE,
-  CROSSING_RESULT_MESSAGE,
+  GAME_STATUS,
   ERROR_MESSAGE,
   RESULT_MESSAGE,
 };

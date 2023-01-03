@@ -1,58 +1,44 @@
-const { CROSSING_RESULT, DIRECTION } = require('../utils/constants');
+const { GAME_STATUS } = require('../utils/message');
 
 /**
  * 다리 건너기 게임을 관리하는 클래스
  */
 class BridgeGame {
   #bridge;
-  #userBridge;
-  #numberOfAttempts;
+  #position;
+  #gameStatus;
 
-  constructor() {
-    this.#bridge = [];
-    this.#userBridge = [];
-    this.#numberOfAttempts = 1;
+  constructor(bridge) {
+    this.#bridge = bridge;
+    this.#position = 0;
+    this.#gameStatus = GAME_STATUS.playing;
   }
 
-  selectMovemomentDirection(input) {
-    return this.#userBridge.push(input);
+  getGameStatus() {
+    return this.#gameStatus;
   }
 
-  updateBridge(bridge) {
-    return (this.#bridge = bridge);
+  move(direction) {
+    const isMove = this.#isMove(direction);
+
+    if (isMove) {
+      this.#position += 1;
+      this.#gameStatus = this.#bridge.isEndOfBridge(this.#position)
+        ? GAME_STATUS.win
+        : GAME_STATUS.playing;
+    } else {
+      this.#gameStatus = GAME_STATUS.fail;
+    }
+    return { moveSuccess: isMove, gameStatus: this.#gameStatus };
   }
 
-  isSuccess() {
-    return !!(this.#bridge.length === this.#userBridge.length);
-  }
-
-  getNumberOfAttempts() {
-    return this.#numberOfAttempts;
-  }
-
-  move() {
-    return this.#userBridge.reduce((trace, direction, index) => {
-      if (direction === this.#bridge[index]) this.#firstTrace(trace, direction);
-      if (direction !== this.#bridge[index]) this.#traceFromSecond(trace, direction);
-      return trace;
-    }, []);
-  }
-
-  #firstTrace(trace, direction) {
-    return direction === DIRECTION.up
-      ? trace.push([CROSSING_RESULT.success, DIRECTION.nothing])
-      : trace.push([DIRECTION.nothing, CROSSING_RESULT.success]);
-  }
-
-  #traceFromSecond(trace, direction) {
-    return direction === DIRECTION.up
-      ? trace.push([CROSSING_RESULT.fail, DIRECTION.nothing])
-      : trace.push([DIRECTION.nothing, CROSSING_RESULT.fail]);
+  #isMove(direction) {
+    return this.#bridge.isAccessiblePosition(this.#position, direction);
   }
 
   retry() {
-    this.#userBridge = [];
-    this.#numberOfAttempts += 1;
+    this.#position = 0;
+    this.#gameStatus = GAME_STATUS.playing;
   }
 }
 

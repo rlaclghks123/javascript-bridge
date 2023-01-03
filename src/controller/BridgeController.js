@@ -1,100 +1,107 @@
+const { Console } = require('@woowacourse/mission-utils');
+
 const BridgeGame = require('../model/BridgeGame');
-const BridgeMaker = require('../BridgeMaker.js');
-const BridgeRandomNumberGenerator = require('../BridgeRandomNumberGenerator.js');
+const Bridge = require('../model/Bridge');
+const History = require('../model/History');
+
 const InputView = require('../view/InputView');
 const OutputView = require('../view/OutputView');
+
 const Validate = require('../utils/Validate');
-const { Console } = require('@woowacourse/mission-utils');
-const { CROSSING_RESULT, COMMAND } = require('../utils/constants');
-const { CROSSING_RESULT_MESSAGE } = require('../utils/message');
 const HandleValidate = require('../utils/handleValidate');
+const { COMMAND } = require('../utils/constants');
+const { GAME_STATUS } = require('../utils/message');
 
 class BridgeController {
   #bridgeGame;
-
-  constructor() {
-    this.#bridgeGame = new BridgeGame();
-  }
+  #history;
 
   start() {
-    OutputView.printStartAnnouncement();
+    OutputView.printStart();
     this.requestBridgeSize();
   }
 
   requestBridgeSize() {
-    InputView.readBridgeSize(this.createBridge.bind(this));
+    InputView.readBridgeSize(this.checkBridgeSize.bind(this));
   }
 
-  createBridge(size) {
+  checkBridgeSize(size) {
     if (!HandleValidate.checkValidate(Validate.validateSizeRange, Number(size))) {
       return this.requestBridgeSize();
     }
 
-    const bridge = BridgeMaker.makeBridge(Number(size), BridgeRandomNumberGenerator.generate);
-    this.#bridgeGame.updateBridge(bridge);
+    this.setGame(size);
+  }
+
+  setGame(size) {
+    const bridge = new Bridge(size);
+    bridge.makeBridge();
+    this.#bridgeGame = new BridgeGame(bridge);
+    this.#history = new History();
+
     OutputView.printLineBreak();
     this.requestBridgeMovemoment();
   }
 
   requestBridgeMovemoment() {
-    InputView.readMoving(this.controlMovemoment.bind(this));
+    InputView.readMoving(this.checkMoving.bind(this));
   }
 
-  controlMovemoment(movePosition) {
-    if (!HandleValidate.checkValidate(Validate.validateMovePosition, movePosition)) {
+  checkMoving(direction) {
+    if (!HandleValidate.checkValidate(Validate.validateCrossDirection, direction)) {
       return this.requestBridgeMovemoment();
     }
-
-    this.#bridgeGame.selectMovemomentDirection(movePosition);
-    const drawBridge = this.getDrawBridge();
-    OutputView.printMap(drawBridge);
-    this.controlNextStep(drawBridge);
+    this.playGame(direction);
   }
 
-  getDrawBridge() {
-    const traceOfCrossingBridge = this.#bridgeGame.move();
-    return this.drawBridge(traceOfCrossingBridge);
+  playGame(direction) {
+    const { moveSuccess, gameStatus } = this.#bridgeGame.move(direction);
+    OutputView.printMap(this.#history.updateMoveTrace(direction, moveSuccess));
+
+    this.handleMove(gameStatus);
   }
 
-  drawBridge(traceOfCrossingBridge) {
-    const bridge = { upBridge: '', downBridge: '' };
-    traceOfCrossingBridge.forEach((position) => {
-      bridge.upBridge += ` | ${position[0]}`;
-      bridge.downBridge += ` | ${position[1]}`;
-    });
-    bridge.upBridge = `[ ${[...bridge.upBridge].splice(3).join('')} ]`;
-    bridge.downBridge = `[ ${[...bridge.downBridge].splice(3).join('')} ]`;
-    return bridge;
-  }
-
-  controlNextStep(drawBridge) {
-    if (
-      drawBridge.upBridge.includes(CROSSING_RESULT.fail) ||
-      drawBridge.downBridge.includes(CROSSING_RESULT.fail)
-    ) {
-      return this.requestGameCommand();
+  handleMove(gameStatus) {
+    if (gameStatus === GAME_STATUS.win) {
+      OutputView.printResult(this.#history.getHistory(), gameStatus);
+      Console.close();
+    } else if (gameStatus === GAME_STATUS.fail) {
+      this.requestGameCommand();
+    } else if (gameStatus === GAME_STATUS.playing) {
+      this.requestBridgeMovemoment();
     }
-    if (this.#bridgeGame.isSuccess()) return this.controlFinish(CROSSING_RESULT_MESSAGE.success);
-    return this.requestBridgeMovemoment();
   }
 
   requestGameCommand() {
-    InputView.readGameCommand(this.controlGameCommand.bind(this));
+    InputView.readGameCommand(this.checkGameCommand.bind(this));
   }
 
-  controlGameCommand(input) {
-    if (!HandleValidate.checkValidate(Validate.validateRetryOfQuit, input)) {
+  checkGameCommand(command) {
+    if (!HandleValidate.checkValidate(Validate.validateRetryOfQuit, command)) {
       return this.requestGameCommand();
     }
 
-    if (input === COMMAND.retry) return this.#bridgeGame.retry() || this.requestBridgeMovemoment();
-    return this.controlFinish(CROSSING_RESULT_MESSAGE.fail);
+    this.handleGameCommand(command);
   }
 
-  controlFinish(result) {
-    const attemps = this.#bridgeGame.getNumberOfAttempts();
-    const drawBridge = this.getDrawBridge();
-    return OutputView.printResult(drawBridge, result, attemps) || Console.close();
+  handleGameCommand(command) {
+    if (command === COMMAND.retry) {
+      this.handleRestart();
+    } else if (command === COMMAND.quit) {
+      this.handleQuit();
+    }
+  }
+
+  handleRestart() {
+    this.#bridgeGame.retry();
+    this.#history.resetHistory();
+
+    this.requestBridgeMovemoment();
+  }
+
+  handleQuit() {
+    OutputView.printResult(this.#history.getHistory(), this.#bridgeGame.getGameStatus());
+    Console.close();
   }
 }
 module.exports = BridgeController;
