@@ -12,7 +12,7 @@ const Validate = {
     }
   },
 
-  validateMovePosition(moveDirection) {
+  validateCrossDirection(moveDirection) {
     if (moveDirection !== DIRECTION.up && moveDirection !== DIRECTION.down) {
       throw new Error(ERROR_MESSAGE.moveDirection);
     }

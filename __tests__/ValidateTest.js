@@ -18,13 +18,13 @@ describe('예외 테스트', () => {
   describe('movemoment Test', () => {
     test.each(['u', 'd', '3', '0', 'UU', 'dD'])('이동할 칸에 대한 입력값 예외 테스트', (input) => {
       expect(() => {
-        Validate.validateMovePosition(input);
+        Validate.validateCrossDirection(input);
       }).toThrow('[ERROR] 이동할 칸은 위 : U 또는 아래 : D인 문자로 입력해주세요.');
     });
 
     test.each(['U', 'D'])('이동할 칸 입력값 통과 테스트', (input) => {
       expect(() => {
-        Validate.validateMovePosition(input);
+        Validate.validateCrossDirection(input);
       }).not.toThrow();
     });
   });
