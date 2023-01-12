@@ -56,7 +56,7 @@
 
 ## 설계 및 구현
 
-- [x] Model : BridgeGame파일로서 사용자가 입력한 size를 통해 만든 다리, 사용자가 지나온 다리, 시도횟수를 관리합니다.
+- [x] Model : size, 컴퓨터가 만든 다리, 게임상태(진행중인지, 성공, 실패), 현재 다리의 위치 등 Data를 관리 하는 부분을 Model로 분리했습니다.
 - [x] View : InputVeiw, OutputView 2가지로서, 입력받는 부분, 출력하는 부분을 관리합니다.
 - [x] Controller : InputView로부터 입력받은 값들의 대한 유효성검사 및 Model로 부터 받은 Data들을 조립하여 다시 outputView로 보내주는 등 Model과 View의 중재자로서 로직들을 관리합니다.
 
