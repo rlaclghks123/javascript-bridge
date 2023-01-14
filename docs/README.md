@@ -10,6 +10,33 @@
 
 <hr>
 
+## 파일구조
+
+```js
+📦src
+ ┣ 📂controller
+ ┃ ┗ 📜BridgeController.js
+ ┃
+ ┣ 📂model
+ ┃ ┣ 📜Bridge.js
+ ┃ ┣ 📜BridgeGame.js
+ ┃ ┗ 📜History.js
+ ┃
+ ┣ 📂utils
+ ┃ ┣ 📜HandleValidate.js
+ ┃ ┣ 📜Validate.js
+ ┃ ┣ 📜constants.js
+ ┃ ┗ 📜message.js
+ ┃
+ ┣ 📂view
+ ┃ ┣ 📜InputView.js
+ ┃ ┗ 📜OutputView.js
+ ┃
+ ┣ 📜App.js
+ ┣ 📜BridgeMaker.js
+ ┗ 📜BridgeRandomNumberGenerator.js
+```
+
 ## 🔍 기능목록
 
 #### 입력
